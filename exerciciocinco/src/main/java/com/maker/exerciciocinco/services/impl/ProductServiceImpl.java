@@ -6,7 +6,9 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,9 +42,7 @@ public class ProductServiceImpl implements ProductService{
 		
 		validateSku(product);
 		
-		for(Sku sku : product.getSkus()) {
-			skuService.validateCodeBar(sku);
-		}
+		for(Sku sku : product.getSkus()) skuService.validateCodeBar(sku);
 		
 		product = productRepository.save(product);
 		
@@ -97,11 +97,12 @@ public class ProductServiceImpl implements ProductService{
 		
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public Product updateProductFromUrl(Long idProduct) throws ClassNotFoundException {
-		Product product = findById(idProduct);
-		Product productManaged = new Product();
+		Product productManaged = findById(idProduct);
 		
+		 Map<String, String> dados = new HashMap<>();
 		try {
 			String urlGet = "https://mockbin.org/bin/fd9103a1-81dc-4a5d-88c3-dd9f8eaf2661";
 		
@@ -116,41 +117,32 @@ public class ProductServiceImpl implements ProductService{
                 BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()));
              
                 String descricao = br.readLine();
-         
-                productManaged =  new  ObjectMapper().readValue(descricao, Product.class);  
+                ObjectMapper mapper = new ObjectMapper();
+                 dados = mapper.readValue(descricao, Map.class);  
             }
 		} catch (IOException e) {
 
 			e.printStackTrace();
 		}
 
-		return updateProduct(productManaged, product);
+		return updateProduct(productManaged, dados);
 	}
 	
 
-	private Product updateProduct(Product object, Product productManaged) throws ClassNotFoundException{
+	private Product updateProduct(Product productManaged,  Map<String, String> dados) throws ClassNotFoundException{
 		
 		try {
 			
-			Class<?> obj = Class.forName("com.maker.exerciciocinco.entities.Product");
-            Field[] atributosObject= obj.getDeclaredFields();
-
             Class<?> c = Class.forName("com.maker.exerciciocinco.entities.Product");
             Field[] atributos= c.getDeclaredFields();
-            
-            	for(Field fieldsObject : atributosObject) {
-		            for(Field fields : atributos) {
-		            	
-		            	if(fields.getName().equals(fieldsObject.getName())) {
-		            		productManaged.setMarca(Util.nvl(object.getMarca(), productManaged.getMarca()));
-		            		productManaged.setDepartamento(Util.nvl(object.getDepartamento(), productManaged.getDepartamento()));
-		            		productManaged.setDescricao(Util.nvl(object.getDescricao(), productManaged.getDescricao()));
-		            		productManaged.setQuantidadeEstoque(Util.nvl(object.getQuantidadeEstoque(), productManaged.getQuantidadeEstoque()));
-		            		productManaged.setImagens(Util.nvl(object.getImagens(), productManaged.getImagens()));
-		            		productManaged.setSkus(Util.nvl(object.getSkus(), productManaged.getSkus()));
-		            	}
-			         }
-            	}
+
+	            for(Field fields : atributos) {
+
+	            	if(dados.containsKey(fields.getName())) {
+	            		productManaged.setDescricao(Util.nvl(dados.get(fields.getName()), productManaged.getDescricao()));
+
+	            	}
+		         }
 		}
          catch (Throwable e) {
             System.err.println(e);
