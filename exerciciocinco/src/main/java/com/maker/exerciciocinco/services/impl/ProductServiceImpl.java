@@ -20,12 +20,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.maker.exerciciocinco.entities.Product;
 import com.maker.exerciciocinco.entities.Sku;
 import com.maker.exerciciocinco.exceptions.DataIntegrityException;
-import com.maker.exerciciocinco.exceptions.NotFoundException;
+
 import com.maker.exerciciocinco.exceptions.ObjectNotFound;
 import com.maker.exerciciocinco.repositories.ProductRepository;
 import com.maker.exerciciocinco.services.ProductService;
 import com.maker.exerciciocinco.services.SkuService;
 import com.maker.exerciciocinco.utils.Util;
+import com.maker.exerciciocinco.validators.ValidateEntityFields;
 
 @Service
 public class ProductServiceImpl implements ProductService{
@@ -36,11 +37,13 @@ public class ProductServiceImpl implements ProductService{
 	@Autowired
 	private SkuService skuService;
 	
+	private ValidateEntityFields validate = new ValidateEntityFields();
+	
 	@Override
 	@Transactional
 	public Product insert(Product product) {
 		
-		validateSku(product);
+		validate.ValidateEntity(product);
 		
 		for(Sku sku : product.getSkus()) skuService.validateCodeBar(sku);
 		
@@ -58,7 +61,7 @@ public class ProductServiceImpl implements ProductService{
 	public void update(Long idProduct, Product product) {
 		Product productManaged = findById(idProduct);
 		
-		validateSku(product);
+		validate.ValidateEntity(product);
 		
 		productManaged.setMarca(Util.nvl(product.getMarca(), productManaged.getMarca()));
 		productManaged.setDepartamento(Util.nvl(product.getDepartamento(), productManaged.getDepartamento()));
@@ -148,13 +151,5 @@ public class ProductServiceImpl implements ProductService{
             System.err.println(e);
          }
 		return productRepository.save(productManaged);
-	}
-	
-	
-	private void validateSku(Product product) {
-		
-		if(product.getSkus().size() == 0) {
-			throw new NotFoundException("Sku cannot be null! Id " + product.getId() + ", Type: " + Product.class.getName());
-		}
 	}
 }

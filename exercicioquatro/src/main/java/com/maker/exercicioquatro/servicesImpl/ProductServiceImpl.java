@@ -11,12 +11,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.maker.exercicioquatro.entities.Product;
 import com.maker.exercicioquatro.entities.Sku;
 import com.maker.exercicioquatro.exceptions.DataIntegrityException;
-import com.maker.exercicioquatro.exceptions.NotFoundException;
 import com.maker.exercicioquatro.exceptions.ObjectNotFound;
 import com.maker.exercicioquatro.repositories.ProductRepository;
 import com.maker.exercicioquatro.services.ProductService;
 import com.maker.exercicioquatro.services.SkuService;
 import com.maker.exercicioquatro.utils.Util;
+import com.maker.exercicioquatro.validators.ValidateEntityFields;
 
 @Service
 public class ProductServiceImpl implements ProductService{
@@ -27,11 +27,13 @@ public class ProductServiceImpl implements ProductService{
 	@Autowired
 	private SkuService skuService;
 	
+	private ValidateEntityFields validate = new ValidateEntityFields();
+	
 	@Override
 	@Transactional
 	public Product insert(Product product) {
 		
-		validateSku(product);
+		validate.ValidateEntity(product);
 		
 		for(Sku sku : product.getSkus()) {
 			skuService.validateCodeBar(sku);
@@ -51,7 +53,7 @@ public class ProductServiceImpl implements ProductService{
 	public void update(Long idProduct, Product product) {
 		Product productManaged = findById(idProduct);
 		
-		validateSku(product);
+		validate.ValidateEntity(product);
 		
 		productManaged.setMarca(Util.nvl(product.getMarca(), productManaged.getMarca()));
 		productManaged.setDepartamento(Util.nvl(product.getDepartamento(), productManaged.getDepartamento()));
@@ -88,12 +90,5 @@ public class ProductServiceImpl implements ProductService{
 			throw new DataIntegrityException("Cannot delete");
 		}
 		
-	}
-	
-	private void validateSku(Product product) {
-		
-		if(product.getSkus().size() == 0) {
-			throw new NotFoundException("Sku cannot be null! Id " + product.getId() + ", Type: " + Product.class.getName());
-		}
 	}
 }

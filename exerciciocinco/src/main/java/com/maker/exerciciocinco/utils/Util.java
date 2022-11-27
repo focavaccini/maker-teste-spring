@@ -14,4 +14,12 @@ public class Util {
         }
         return (T) ((originalInstance == null) ? returnIfNull : originalInstance);
     }
+	
+	public static boolean isNullOrEmpty(String str) {
+	    return str == null || str.trim().isEmpty() || str.equalsIgnoreCase("null");
+	}
+	
+	public static boolean isNullOrEmpty(Object str) {
+	        return str == null || str.toString().trim().isEmpty();
+	}
 }

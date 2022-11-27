@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import com.maker.exercicioquatro.exceptions.BadRequestException;
 import com.maker.exercicioquatro.exceptions.DataIntegrityException;
 import com.maker.exercicioquatro.exceptions.NotFoundException;
 import com.maker.exercicioquatro.exceptions.ObjectNotFound;
@@ -20,6 +21,12 @@ public class ResourceExceptionHandler {
 	public ResponseEntity<StandardError> objectNotFound(ObjectNotFound e, HttpServletRequest request){
 		StandardError err = new StandardError(System.currentTimeMillis(), HttpStatus.NOT_FOUND.value(), "Não encontrado", e.getMessage(), request.getRequestURI());
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(err);
+	}
+	
+	@ExceptionHandler(BadRequestException.class)
+	public ResponseEntity<StandardError> badRequestException(BadRequestException e, HttpServletRequest request){
+		StandardError err = new StandardError(System.currentTimeMillis(), HttpStatus.NOT_FOUND.value(), "Campos obrigatórios", e.getMessage(), request.getRequestURI());
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
 	}
 	
 	@ExceptionHandler(UniqueException.class)

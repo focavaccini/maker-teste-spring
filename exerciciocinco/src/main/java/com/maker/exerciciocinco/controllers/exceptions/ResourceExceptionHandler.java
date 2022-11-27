@@ -12,6 +12,7 @@ import com.maker.exerciciocinco.exceptions.DataIntegrityException;
 import com.maker.exerciciocinco.exceptions.NotFoundException;
 import com.maker.exerciciocinco.exceptions.ObjectNotFound;
 import com.maker.exerciciocinco.exceptions.UniqueException;
+import com.maker.exerciciocinco.exceptions.BadRequestException;
 
 @ControllerAdvice
 public class ResourceExceptionHandler {
@@ -20,6 +21,12 @@ public class ResourceExceptionHandler {
 	public ResponseEntity<StandardError> objectNotFound(ObjectNotFound e, HttpServletRequest request){
 		StandardError err = new StandardError(System.currentTimeMillis(), HttpStatus.NOT_FOUND.value(), "Não encontrado", e.getMessage(), request.getRequestURI());
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(err);
+	}
+	
+	@ExceptionHandler(BadRequestException.class)
+	public ResponseEntity<StandardError> badRequestException(BadRequestException e, HttpServletRequest request){
+		StandardError err = new StandardError(System.currentTimeMillis(), HttpStatus.NOT_FOUND.value(), "Campos obrigatórios", e.getMessage(), request.getRequestURI());
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
 	}
 	
 	@ExceptionHandler(UniqueException.class)
