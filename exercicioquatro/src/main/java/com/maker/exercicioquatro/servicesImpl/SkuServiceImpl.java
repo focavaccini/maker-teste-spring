@@ -60,7 +60,7 @@ public class SkuServiceImpl implements SkuService{
 		
 		for (Sku obj : skus) {
 			
-			if(obj.getCodigoBarra().equals(sku.getCodigoBarra())) {
+			if(obj.getCodigoBarra().equalsIgnoreCase(sku.getCodigoBarra())) {
 				
 				throw new UniqueException("Invalid Request! Id " + obj.getId() + ", Type: " + Sku.class.getName());
 			}
@@ -74,7 +74,7 @@ public class SkuServiceImpl implements SkuService{
 		
 		for (Sku obj : skusManaged) {
 			
-				if(obj.getCodigoBarra().equals(sku.getCodigoBarra()) && !obj.getId().equals(sku.getId())) {
+				if(obj.getCodigoBarra().equalsIgnoreCase(sku.getCodigoBarra()) && !obj.getId().equals(sku.getId())) {
 					throw new UniqueException("Object not found! Id " + obj.getId() + ", Type: " + Sku.class.getName());
 				}
 			
